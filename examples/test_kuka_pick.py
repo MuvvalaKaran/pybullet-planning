@@ -39,8 +39,8 @@ def plan(robot, block, fixed, teleport):
     return None
 
 
-def main(display='execute'): # control | execute | step
-    connect(use_gui=True)
+def main(display='execute', use_gui=True): # control | execute | step
+    connect(use_gui=use_gui)
     disable_real_time()
     draw_global_system()
     with HideOutput():

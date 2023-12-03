@@ -146,14 +146,14 @@ IJCAI = ['exists_hold_obs_0.json', 'exists_hold_obs_1.json',
 
 SCREENSHOT_DIR = 'images/json'
 
-def main(screenshot=False):
-    connect(use_gui=True)
+def main(screenshot: bool = False, use_gui: bool = False):
+    connect(use_gui=use_gui)
     print(get_json_filenames())
 
     #problem_filenames = sorted(os.listdir(openrave_directory))
     #problem_filenames = ['{}.json'.format(name) for name in FFROB]
-    #problem_filenames = ['sink_stove_4_30.json'] # 'dinner.json' | 'simple.json'
-    problem_filenames = ['simple.json'] # 'dinner.json' | 'simple.json'
+    problem_filenames = ['sink_stove_4_30.json'] # 'dinner.json' | 'simple.json'
+    # problem_filenames = ['dinner.json'] # 'dinner.json' | 'simple.json'
 
     # Mac width/height
     #width = 2560

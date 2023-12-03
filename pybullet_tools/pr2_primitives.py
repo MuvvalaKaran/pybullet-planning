@@ -372,7 +372,8 @@ def get_stable_gen(problem, collisions=True, **kwargs):
             p = Pose(body, body_pose, surface)
             p.assign()
             if not any(pairwise_collision(body, obst) for obst in obstacles if obst not in {body, surface}):
-                yield (p,)
+                # yield (p,)
+                yield p
     # TODO: apply the acceleration technique here
     return gen
 

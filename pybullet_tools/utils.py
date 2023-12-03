@@ -39,7 +39,8 @@ def get_parent_dir(file): # __file__
 sys.path.extend([
     join_paths(get_parent_dir(__file__), os.pardir, 'motion'),
 ])
-from motion_planners.meta import solve
+# from motion_planners.meta import solve
+from motion.motion_planners.meta import solve
 
 # from future_builtins import map, filter
 # from builtins import input # TODO - use future

@@ -6,12 +6,12 @@ import time
 
 from pybullet_tools.pr2_utils import set_arm_conf, get_other_arm, arm_conf, REST_LEFT_ARM, \
     get_carry_conf, get_gripper_link, GET_GRASPS, IR_FILENAME, get_database_file, DRAKE_PR2_URDF, \
-    set_group_conf, get_group_conf, get_base_pose
+    set_group_conf, get_group_conf, get_base_pose, create_gripper
 from pybullet_tools.utils import create_box, disconnect, add_data_path, connect, get_movable_joints, get_joint_positions, \
     sample_placement, set_pose, multiply, invert, set_joint_positions, pairwise_collision, inverse_kinematics, \
     get_link_pose, get_body_name, write_pickle, uniform_pose_generator, set_base_values, \
     load_pybullet, HideOutput, wait_if_gui, draw_point, point_from_pose, has_gui, elapsed_time, \
-    sub_inverse_kinematics, BodySaver
+    sub_inverse_kinematics, BodySaver, remove_body, dump_body, load_model
 from pybullet_tools.pr2_problems import create_table
 from pybullet_tools.ikfast.pr2.ik import pr2_inverse_kinematics, is_ik_compiled
 from pybullet_tools.ikfast.utils import USE_CURRENT
@@ -85,6 +85,22 @@ class MockProblem(object):
         self.robot = robot
         self.fixed = fixed
         self.grasp_types = grasp_types
+        self.gripper = None
+        
+    def get_gripper(self, arm='left', visual=True):
+        # upper = get_max_limit(problem.robot, get_gripper_joints(problem.robot, 'left')[0])
+        # set_configuration(gripper, [0]*4)
+        # dump_body(gripper)
+        if self.gripper is None:
+            self.gripper = create_gripper(self.robot, arm=arm, visual=visual)
+        return self.gripper
+    def remove_gripper(self):
+        if self.gripper is not None:
+            remove_body(self.gripper)
+            self.gripper = None
+    def __repr__(self):
+        return repr(self.__dict__)
+
 
 def create_inverse_reachability2(robot, body, table, arm, grasp_type, max_attempts=500, num_samples=500):
     tool_link = get_gripper_link(robot, arm)
@@ -101,8 +117,11 @@ def create_inverse_reachability2(robot, body, table, arm, grasp_type, max_attemp
     start_time = time.time()
     gripper_from_base_list = []
     while len(gripper_from_base_list) < num_samples:
-        [(p,)] = next(placement_gen)
+        # print(list(placement_gen))
+        # [(p,)] = next(placement_gen)
+        p = placement_gen
         (g,) = random.choice(grasps)
+        # output = next(ik_ir_fn(arm, body, p, g), None)
         output = next(ik_ir_fn(arm, body, p, g), None)
         if output is None:
             print('Failed to find a solution after {} attempts'.format(max_attempts))
@@ -120,21 +139,29 @@ def create_inverse_reachability2(robot, body, table, arm, grasp_type, max_attemp
 #######################################################
 
 def main():
-    parser = argparse.ArgumentParser()  # Automatically includes help
-    parser.add_argument('-arm', required=True)
-    parser.add_argument('-grasp', required=True)
-    parser.add_argument('-viewer', action='store_true', help='enable viewer.')
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()  # Automatically includes help
+    # parser.add_argument('-arm', required=True)
+    # parser.add_argument('-grasp', required=True)
+    # parser.add_argument('-viewer', action='store_true', help='enable viewer.')
+    # args = parser.parse_args()
 
-    arm = args.arm
+    # arm = args.arm
+    # other_arm = get_other_arm(arm)
+    # grasp_type = args.grasp
+
+    arm = 'left'
     other_arm = get_other_arm(arm)
-    grasp_type = args.grasp
+    grasp_type = 'top'
 
-    connect(use_gui=args.viewer)
+
+    # connect(use_gui=args.viewer)
+    connect(use_gui=False)
     add_data_path()
 
     with HideOutput():
-        robot = load_pybullet(DRAKE_PR2_URDF)
+        # robot = load_pybullet(DRAKE_PR2_URDF)
+        robot = load_model(DRAKE_PR2_URDF)
+    dump_body(robot)
     set_group_conf(robot, 'torso', [0.2])
     set_arm_conf(robot, arm, get_carry_conf(arm, grasp_type))
     set_arm_conf(robot, other_arm, arm_conf(other_arm, REST_LEFT_ARM))

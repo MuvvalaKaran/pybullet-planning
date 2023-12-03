@@ -7,7 +7,7 @@ import time
 import numpy as np
 
 from pybullet_tools.pr2_utils import TOP_HOLDING_LEFT_ARM, PR2_URDF, DRAKE_PR2_URDF, \
-    SIDE_HOLDING_LEFT_ARM, PR2_GROUPS, open_arm, get_disabled_collisions, REST_LEFT_ARM, rightarm_from_leftarm
+    SIDE_HOLDING_LEFT_ARM, PR2_GROUPS, open_arm, close_arm, get_disabled_collisions, REST_LEFT_ARM, rightarm_from_leftarm
 from pybullet_tools.utils import set_base_values, joint_from_name, quat_from_euler, set_joint_position, \
     set_joint_positions, add_data_path, connect, plan_base_motion, plan_joint_motion, enable_gravity, \
     joint_controller, dump_body, load_model, joints_from_names, wait_if_gui, disconnect, get_joint_positions, \
@@ -15,7 +15,7 @@ from pybullet_tools.utils import set_base_values, joint_from_name, quat_from_eul
     wait_for_duration, LockRenderer, base_aligned_z, Point, set_point, get_aabb, stable_z_on_aabb, AABB
 
 # TODO: consider making this a function
-SLEEP = None # None | 0.05
+SLEEP = 0.05 # None | 0.05
 
 
 def test_base_motion(pr2, base_start, base_goal, obstacles=[]):
@@ -107,7 +107,7 @@ def test_ikfast(pr2):
         print(i, len(solutions))
         for q in solutions:
             set_joint_positions(pr2, torso_left, q)
-            wait_if_gui()
+            # wait_if_gui()
 
 #####################################
 
@@ -151,7 +151,7 @@ def main(use_pr2_drake=True):
     set_joint_positions(pr2, right_joints, rightarm_from_leftarm(REST_LEFT_ARM))
     set_joint_positions(pr2, torso_joints, [0.2])
     open_arm(pr2, 'left')
-    # test_ikfast(pr2)
+    test_ikfast(pr2)
 
     add_line(base_start, base_goal, color=RED)
     print(base_start, base_goal)
@@ -162,6 +162,10 @@ def main(use_pr2_drake=True):
 
     test_arm_motion(pr2, left_joints, arm_goal)
     # test_arm_control(pr2, left_joints, arm_start)
+    wait_if_gui('Close Arm?')
+    close_arm(pr2, 'left')
+    wait_if_gui('Open Arm Again?')
+    open_arm(pr2, 'left')
 
     wait_if_gui('Finish?')
     disconnect()
